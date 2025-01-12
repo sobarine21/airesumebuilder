@@ -2,10 +2,17 @@ import streamlit as st
 import google.generativeai as genai
 from fpdf import FPDF
 from docx import Document
-import os
+import unicodedata
 
 # Configure the Gemini API key securely from Streamlit's secrets
 genai.configure(api_key=st.secrets["GOOGLE_API_KEY"])
+
+def normalize_text(text):
+    """
+    Normalize text to remove special characters and replace them with plain ASCII equivalents.
+    """
+    normalized = unicodedata.normalize('NFKD', text)
+    return ''.join(c for c in normalized if unicodedata.category(c) != 'Mn')
 
 # Streamlit App UI
 st.title("AI-Powered Resume Builder")
@@ -63,6 +70,9 @@ if st.button("Generate Resume"):
             model = genai.GenerativeModel('gemini-1.5-flash')
             response = model.generate_content(prompt)
             resume_text = response.text
+
+            # Normalize the text to remove special characters
+            resume_text = normalize_text(resume_text)
 
             # Display the AI-generated resume in Streamlit
             st.subheader("AI-Generated Resume")
