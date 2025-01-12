@@ -68,7 +68,7 @@ if st.button("Generate Resume"):
             st.subheader("AI-Generated Resume")
             st.write(resume_text)
 
-            # Convert the generated resume text into a PDF (with or without profile pic)
+            # Convert the generated resume text into a PDF
             pdf = FPDF()
             pdf.set_auto_page_break(auto=True, margin=15)
             pdf.add_page()
@@ -81,8 +81,11 @@ if st.button("Generate Resume"):
                 pdf.image(img_path, x=10, y=10, w=30)
 
             # Add content to PDF
+            pdf.set_font("Arial", style="B", size=14)
+            pdf.ln(40 if profile_pic else 10)  # Adjust space based on image presence
+            pdf.cell(0, 10, "Resume", ln=True, align="C")
             pdf.set_font("Arial", size=12)
-            pdf.ln(35)  # Add space after the image
+            pdf.ln(10)
             pdf.multi_cell(0, 10, resume_text)
 
             # Save the generated PDF to a file
@@ -101,7 +104,8 @@ if st.button("Generate Resume"):
             # Convert the generated resume text into DOCX format
             doc = Document()
             doc.add_heading(f"Resume of {name}", 0)
-            doc.add_paragraph(resume_text)
+            for line in resume_text.split("\n"):
+                doc.add_paragraph(line)
 
             # Save the DOCX file
             resume_docx = "/tmp/generated_resume.docx"
@@ -119,7 +123,7 @@ if st.button("Generate Resume"):
         except Exception as e:
             st.error(f"Error: {e}")
     else:
-        st.warning("Please fill in all the fields before generating the resume.")
+        st.warning("Please fill in all the required fields before generating the resume.")
 
 # Footer
 st.markdown("""
