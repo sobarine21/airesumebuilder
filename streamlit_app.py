@@ -9,10 +9,11 @@ genai.configure(api_key=st.secrets["GOOGLE_API_KEY"])
 
 def normalize_text(text):
     """
-    Normalize text to remove special characters and replace them with plain ASCII equivalents.
+    Normalize text to remove problematic characters and replace them with plain ASCII equivalents.
     """
     normalized = unicodedata.normalize('NFKD', text)
-    return ''.join(c for c in normalized if unicodedata.category(c) != 'Mn')
+    cleaned_text = ''.join(c if ord(c) < 128 else '-' for c in normalized)  # Replace non-ASCII chars with '-'
+    return cleaned_text
 
 # Streamlit App UI
 st.title("AI-Powered Resume Builder")
@@ -93,7 +94,7 @@ if st.button("Generate Resume"):
             # Add resume content to the PDF
             pdf.set_font("Arial", size=12)
             pdf.ln(35)  # Add space after the image
-            pdf.multi_cell(0, 10, resume_text)
+            pdf.multi_cell(0, 10, resume_text.encode('latin-1', 'replace').decode('latin-1'))
 
             # Save the generated PDF to a file
             resume_pdf = "/tmp/generated_resume.pdf"
