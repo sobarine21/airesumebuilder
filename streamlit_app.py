@@ -68,9 +68,14 @@ if st.button("Generate Resume"):
             st.subheader("AI-Generated Resume")
             st.write(resume_text)
 
-            # Convert the generated resume text into a PDF
-            pdf = FPDF()
-            pdf.set_auto_page_break(auto=True, margin=15)
+            # Convert the generated resume text into a PDF (with or without profile pic)
+            class PDF(FPDF):
+                def __init__(self):
+                    super().__init__()
+                    self.add_font('DejaVu', '', 'DejaVuSans.ttf', uni=True)
+                    self.set_font('DejaVu', '', 12)
+
+            pdf = PDF()
             pdf.add_page()
 
             # Add profile picture if uploaded
@@ -79,18 +84,14 @@ if st.button("Generate Resume"):
                 with open(img_path, "wb") as f:
                     f.write(profile_pic.getbuffer())
                 pdf.image(img_path, x=10, y=10, w=30)
+                pdf.ln(40)  # Space after the image
 
             # Add content to PDF
-            pdf.set_font("Arial", style="B", size=14)
-            pdf.ln(40 if profile_pic else 10)  # Adjust space based on image presence
-            pdf.cell(0, 10, "Resume", ln=True, align="C")
-            pdf.set_font("Arial", size=12)
-            pdf.ln(10)
             pdf.multi_cell(0, 10, resume_text)
 
             # Save the generated PDF to a file
             resume_pdf = "/tmp/generated_resume.pdf"
-            pdf.output(resume_pdf)
+            pdf.output(resume_pdf, 'F')
 
             # Provide the download button for the PDF
             with open(resume_pdf, "rb") as f:
@@ -104,8 +105,7 @@ if st.button("Generate Resume"):
             # Convert the generated resume text into DOCX format
             doc = Document()
             doc.add_heading(f"Resume of {name}", 0)
-            for line in resume_text.split("\n"):
-                doc.add_paragraph(line)
+            doc.add_paragraph(resume_text)
 
             # Save the DOCX file
             resume_docx = "/tmp/generated_resume.docx"
@@ -123,10 +123,7 @@ if st.button("Generate Resume"):
         except Exception as e:
             st.error(f"Error: {e}")
     else:
-        st.warning("Please fill in all the required fields before generating the resume.")
+        st.warning("Please fill in all the fields before generating the resume.")
 
 # Footer
-st.markdown("""
----
-*Powered by Gemini AI and Streamlit.*
-""")
+st.markdown("""---\n*Powered by Gemini AI and Streamlit.*""")
