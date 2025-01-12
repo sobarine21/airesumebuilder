@@ -68,14 +68,9 @@ if st.button("Generate Resume"):
             st.subheader("AI-Generated Resume")
             st.write(resume_text)
 
-            # Convert the generated resume text into a PDF (with or without profile pic)
-            class PDF(FPDF):
-                def __init__(self):
-                    super().__init__()
-                    self.add_font('DejaVu', '', 'DejaVuSans.ttf', uni=True)
-                    self.set_font('DejaVu', '', 12)
-
-            pdf = PDF()
+            # Convert the generated resume text into a PDF
+            pdf = FPDF()
+            pdf.set_auto_page_break(auto=True, margin=15)
             pdf.add_page()
 
             # Add profile picture if uploaded
@@ -84,14 +79,15 @@ if st.button("Generate Resume"):
                 with open(img_path, "wb") as f:
                     f.write(profile_pic.getbuffer())
                 pdf.image(img_path, x=10, y=10, w=30)
-                pdf.ln(40)  # Space after the image
 
-            # Add content to PDF
+            # Add resume content to the PDF
+            pdf.set_font("Arial", size=12)
+            pdf.ln(35)  # Add space after the image
             pdf.multi_cell(0, 10, resume_text)
 
             # Save the generated PDF to a file
             resume_pdf = "/tmp/generated_resume.pdf"
-            pdf.output(resume_pdf, 'F')
+            pdf.output(resume_pdf)
 
             # Provide the download button for the PDF
             with open(resume_pdf, "rb") as f:
@@ -126,4 +122,7 @@ if st.button("Generate Resume"):
         st.warning("Please fill in all the fields before generating the resume.")
 
 # Footer
-st.markdown("""---\n*Powered by Gemini AI and Streamlit.*""")
+st.markdown("""
+---
+*Powered by Gemini AI and Streamlit.*
+""")
